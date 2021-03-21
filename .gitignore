@@ -1,0 +1,12 @@
+.idea
+*.pem
+*.ppk
+*.tfstate
+*.tfstate.backup
+.terraform/
+.terraform.tfstate.lock.info
+**/*/*.tfstate
+**/*/terragrunt.hcl
+**/*/*.tfstate.backup
+**/*/.terraform/
+

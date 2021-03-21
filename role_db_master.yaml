@@ -1,0 +1,18 @@
+- hosts: pgmaster
+  roles:
+    - role: ANXS.postgresql
+      become: yes
+      become_method: sudo
+
+  vars_files:
+    - ./vars_db_master.yaml
+
+  tasks:
+  - name: Create a new publication
+    postgresql_publication:
+      login_user: "{{ db_user_name }}"
+      login_password: "{{ db_user_password }}"
+      login_host: "127.0.0.1"
+      db: "{{ db_name }}"
+      name: acme
+    

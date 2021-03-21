@@ -1,0 +1,5 @@
+from_port,to_port,protocol,cidrs,descriptions
+22,22,TCP,0.0.0.0/0,ssh from all
+80,80,TCP,0.0.0.0/0,http from all
+9099,9099,TCP,0.0.0.0/0, maildev http from all
+2599,2599,TCP,0.0.0.0/0, maildev smtp from all

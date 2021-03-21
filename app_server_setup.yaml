@@ -1,0 +1,76 @@
+---
+- name: setup  app servers and deploy code
+  hosts: app
+  become: yes
+
+  vars:
+    nginx_config_file: app/config/api-server/
+    nginx_config_file_destin: /etc/nginx
+    app_directory_server: /var
+    app_directory_local: app
+
+  tasks:
+  - name: Update the apt package index
+    apt:
+       name: "*"
+       state: latest
+       update_cache: yes
+       force_apt_get: yes
+  - name: Install packages for apt add repository over HTTPS
+    apt:
+       name: [git,apt-transport-https,ca-certificates,wget,gnupg,curl,nginx]
+       state: latest
+       update_cache: yes
+
+  - name: Add Apt signing key from official docker repo
+    apt_key:
+       url: https://download.docker.com/linux/debian/gpg
+       state: present
+
+  - name: add docker official repository for Debian Stretch
+    apt_repository:
+       repo: deb [arch=amd64] https://download.docker.com/linux/debian stretch stable
+       state: present
+  - name: Index new repo into the cache
+    apt:
+       name: "*"
+       state: latest
+       update_cache: yes
+       force_apt_get: yes
+  - name: actually install docker
+    apt:
+       name: "docker-ce"
+       state: latest
+
+
+  - name: start  nginx
+    service : name=nginx state=started enabled=yes
+
+  - name: start  docker
+    service : name=docker state=started enabled=yes
+
+  - name: copy nginx config
+    copy: src="app/config/api-server/"  dest="/etc/nginx/" mode=0555
+    notify: nginx_restart
+
+  - name: copy app to server
+    copy: src={{ app_directory_local }}   dest={{ app_directory_server }} mode=0555
+    notify:
+       - docker_maildev
+       - docker_image_build_restart
+
+
+  handlers:
+  - name : docker_image_build_restart
+    shell : "cd {{ app_directory_server }}/{{ app_directory_local }} ; docker build -t app . ; docker  rm   app --force;  docker run --env APP_ENV='dev' --env DB_HOST='{{ db_host }}' --env DB_USER='{{ db_user_name }}' --env DB_NAME='{{ db_name }}' --env MAILER_HOST='{{ app_host }}' --env MAILER_PORT='2599'  --env DB_PASSWORD='{{ db_user_password }}' --name app -p 127.0.0.1:9000:9000/tcp -d app "
+    notify: app_db_migration
+
+  - name : app_db_migration
+    shell : " docker exec app php cli/migrate.php"
+
+  - name : nginx_restart
+    service : name=nginx state=restarted
+
+  - name : docker_maildev
+    shell : "cd {{ app_directory_server }}/{{ app_directory_local }} ;  docker  rm   mailer  --force;  docker run  --name mailer -p 9099:80/tcp -p 2599:25/tcp -d djfarrelly/maildev "
+

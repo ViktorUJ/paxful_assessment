@@ -1,0 +1,11 @@
+{
+    "autoload": {
+        "psr-4": {
+            "app\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.4|^8.0",
+        "swiftmailer/swiftmailer": "^6.2"
+    }
+}

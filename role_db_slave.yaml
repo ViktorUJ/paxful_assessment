@@ -1,0 +1,26 @@
+- hosts: pgslave
+  collections:
+    - community.postgresql
+  roles:
+    - role: ANXS.postgresql
+      become: yes
+      become_method: sudo
+
+  vars_files:
+    - ./vars_db_slave.yaml
+
+#  tasks:
+#  - name: subscription
+#    community.general.postgresql_subscription:
+#      db: "{{ db_name }}"
+#      name: acme
+#      state: present
+#      publications: "acme"
+#      owner: "{{ db_user_name }}"
+#      connparams:
+#        host: "127.0.0.1"
+#        port: "5432"
+#        user: "{{ db_user_name }}"
+#        password: "{{ db_user_password }}"
+#        dbname: "{{ db_name }}"
+#

@@ -1,0 +1,3 @@
+from_port,to_port,protocol,cidrs,descriptions
+22,22,TCP,0.0.0.0/0,ssh from all
+5432,5432,TCP,86.57.156.231/32, db from ci/cd
